@@ -6,6 +6,11 @@ TagManager:
   tags:
   - Ground
   - Toxic
+  - Chest
+  - LazerStop
+  - Open
+  - Close
+  - Health
   layers:
   - Default
   - TransparentFX

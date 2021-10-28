@@ -5,20 +5,24 @@ using UnityEngine.InputSystem;
 
 public class NewPlayerController : MonoBehaviour
 {
+    private int itemNum;
     private PlayerInputActions playerInputActions;
     private CharacterController myCC;
     private Animator myAnimator;
     [SerializeField] private float rotationSpeed;
     [SerializeField] private float runSpeed;
+    [SerializeField] private float jumpVelocity;
 
     Vector2 currentMovementInput;
     Vector3 currentMovement;
-    bool isMovementPressed;
+    bool isMovePressed;
     bool isRunPressed;
     bool isJumpPressed;
     bool isAttackPressed;
+    bool isPickPressed;
 
     private bool isAttacking;
+    private bool isJumping;
     private float gravity;
 
     [SerializeField] private string[] attackAnimNames;
@@ -41,6 +45,9 @@ public class NewPlayerController : MonoBehaviour
 
         playerInputActions.Player.Attack.started += OnAttack;
         playerInputActions.Player.Attack.canceled += OnAttack;
+
+        playerInputActions.Player.Pick.started += OnPick;
+        playerInputActions.Player.Pick.canceled += OnPick;
 
     }
 
@@ -69,20 +76,25 @@ public class NewPlayerController : MonoBehaviour
 
         if(isRunPressed) currentMovement = new Vector3(currentMovement.x * runSpeed, 0, currentMovement.z * runSpeed);
 
-        if(isAttacking) currentMovement = Vector3.zero;
+        //This will cause player rotate to unexpected angle
+        // if(isAttacking) currentMovement = Vector3.zero;
 
-        isMovementPressed = currentMovementInput.x != 0 || currentMovementInput.y != 0;
+        isMovePressed = currentMovementInput.x != 0 || currentMovementInput.y != 0;
     }
 
     // Update is called once per frame
     void Update()
     {
-        Rotate();
+        if(isMovePressed && !isAttacking && !isJumpPressed) Rotate();
+
         HandleAnimation();
 
-        myCC.Move(new Vector3(currentMovement.x, gravity, currentMovement.z) * Time.deltaTime);
+        if(!isAttacking) myCC.Move(currentMovement * Time.deltaTime);
 
         HandleGravity();
+        HandleJump();
+
+        // Debug.Log("currentMovement Y = " + currentMovement.y);
     }
 
     private void HandleGravity()
@@ -93,7 +105,28 @@ public class NewPlayerController : MonoBehaviour
         }
         else
         {
-            gravity = -9.8f;
+            gravity = -20f;
+            currentMovement.y += gravity * Time.deltaTime;
+        }
+    }
+
+    private void HandleJump()
+    {
+        if(!isJumping && myCC.isGrounded && isJumpPressed)
+        {
+            isJumping= true;
+            
+            myAnimator.SetTrigger("Jump");
+            currentMovement.y = jumpVelocity;
+
+            //temporarily change x and z movement
+            //not the best solution
+            currentMovement.x *= 2;
+            currentMovement.z *= 2;
+        }
+        else if(!isJumpPressed && isJumping && myCC.isGrounded)
+        {
+            isJumping = false;
         }
     }
 
@@ -118,6 +151,7 @@ public class NewPlayerController : MonoBehaviour
     private void Dead()
     {
         myAnimator.SetTrigger("Die");
+        GameEvents.current.PlayerDead();
     }
 
     private void HandleAnimation()
@@ -143,7 +177,7 @@ public class NewPlayerController : MonoBehaviour
             isAttacking = false;
         }
 
-        if(isMovementPressed && !isAttacking)
+        if(isMovePressed && !isAttacking)
         {
             myAnimator.SetBool("Walk", true);
 
@@ -166,12 +200,9 @@ public class NewPlayerController : MonoBehaviour
 
     private void Rotate()
     {
-        Quaternion toRotation = Quaternion.LookRotation(currentMovement, Vector3.up);
+        Quaternion toRotation = Quaternion.LookRotation(new Vector3(currentMovement.x, 0, currentMovement.z), Vector3.up);
 
-        if(isMovementPressed)
-        {
-            transform.rotation = Quaternion.RotateTowards(transform.rotation, toRotation, rotationSpeed * Time.deltaTime);    
-        }
+        transform.rotation = Quaternion.RotateTowards(transform.rotation, toRotation, rotationSpeed * Time.deltaTime);    
     }
 
     private void OnRun(InputAction.CallbackContext context)
@@ -182,13 +213,19 @@ public class NewPlayerController : MonoBehaviour
 
     private void OnJump(InputAction.CallbackContext context)
     {
-        isRunPressed = context.ReadValueAsButton();
+        Debug.Log("Jump is " + context.ReadValueAsButton());
+        isJumpPressed = context.ReadValueAsButton();
     }
  
     private void OnAttack(InputAction.CallbackContext context)
     {
         isAttackPressed = context.ReadValueAsButton();
         if(isAttackPressed) GameEvents.current.PlayerAttack();
+    }
+
+    private void OnPick(InputAction.CallbackContext context)
+    {
+       GameEvents.current.PlayerPick();
     }
 
     private void OnEnable() 
@@ -202,4 +239,10 @@ public class NewPlayerController : MonoBehaviour
         //disable the action map
         playerInputActions.Player.Disable();
     }
+
+    public void LevelEnd()
+    {
+        GameEvents.current.LevelEnd();
+    }
+
 }

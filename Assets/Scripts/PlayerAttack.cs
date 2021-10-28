@@ -14,26 +14,31 @@ public class PlayerAttack : MonoBehaviour
 
     void Start()
     {
-        GameEvents.current.OnPlayerAttack += OnAttack;
+        // GameEvents.current.OnPlayerAttack += Attack;
+        GameEvents.current.OnStageThree += ChangeEnemy;
     }
 
 
-    // Update is called once per frame
-    void Update()
+    private void OnDestroy() 
     {
-        // Debug.Log("player attack is " + ValidAttack(transform, EnemyList[0]));
+        // GameEvents.current.OnPlayerAttack -= Attack;
+        GameEvents.current.OnStageThree -= ChangeEnemy;
     }
 
-    private void OnAttack()
+    public void Attack()
     {
         Debug.Log("On Attack");
         
             for(int i = 0; i < EnemyList.Count; i++)
             {
-                if(ValidAttack(transform, EnemyList[i]))
+                if(EnemyList[i] !=null)
                 {
-                    EnemyList[i].GetComponent<HealthManager>().Health -= playerDamage; 
-                    Debug.Log(EnemyList[i].name + "is damaged");
+                    if(ValidAttack(transform, EnemyList[i]))
+                    {
+                        EnemyList[i].GetComponent<HealthManager>().Health -= playerDamage; 
+                        if(EnemyList[i].GetComponent<EnemyController>()) EnemyList[i].GetComponent<EnemyController>().GetHit();
+                        Debug.Log(EnemyList[i].name + "is damaged");
+                    }
                 }
             }
         
@@ -52,5 +57,10 @@ public class PlayerAttack : MonoBehaviour
         }
 
         return false;
+    }
+
+    private void ChangeEnemy()
+    {
+
     }
 }

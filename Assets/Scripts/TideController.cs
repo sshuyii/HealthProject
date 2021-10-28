@@ -6,6 +6,7 @@ public class TideController : MonoBehaviour
 {
     [SerializeField] private float speed;
     [SerializeField] private float height;
+    [SerializeField] private GameObject healthRecoverArea;
 
     private Vector3 initialPosition;
 
@@ -39,6 +40,8 @@ public class TideController : MonoBehaviour
 
     IEnumerator Rising()
     {
+        healthRecoverArea.SetActive(true);
+
         while(transform.position.y < height + initialPosition.y)
         {
             // Debug.Log("Stone is rising");
@@ -61,6 +64,8 @@ public class TideController : MonoBehaviour
 
     IEnumerator Falling()
     {
+        healthRecoverArea.SetActive(false);
+
         while(transform.position.y > initialPosition.y)
         {
             // Debug.Log("Stone is falling");

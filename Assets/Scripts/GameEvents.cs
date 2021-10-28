@@ -47,5 +47,42 @@ public class GameEvents : MonoBehaviour
         OnLevelEnd?.Invoke();
     }
 
+    public event Action OnEnemyDead;
+    public void EnemyDead()
+    {
+        OnEnemyDead?.Invoke();
+    }
+
+    public event Action OnPlayerPick;
+    public void PlayerPick()
+    {
+        OnPlayerPick?.Invoke();
+    }
+
+    public event Action OnStageTwo;
+    public void StageTwo()
+    {
+        OnStageTwo?.Invoke();
+    }
+
+    public event Action OnStageThree;
+    public void StageThree()
+    {
+        OnStageThree?.Invoke();
+    }
+
+    public event Action<int> OnDoorOpen;
+    public void DoorOpen(int i)
+    {
+        OnDoorOpen?.Invoke(i);
+    }
+
+    public event Action<int> OnDoorClose;
+    public void DoorClose(int i)
+    {
+        OnDoorClose?.Invoke(i);
+    }
+
+
 
 }
