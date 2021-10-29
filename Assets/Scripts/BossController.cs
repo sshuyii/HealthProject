@@ -3,40 +3,34 @@ using UnityEngine;
 
 public class BossController : MonoBehaviour
 {
+    [Header("Properties")]
     [SerializeField] private int life;
     [SerializeField] private float restTime;
+    [SerializeField] private float cdLength;
     private float timer;
+    private float cdTimer;
 
+    
+    [Header("References")]
+    [SerializeField] private Transform player;
+    [SerializeField] private GameObject toxicPrefab;
     private Animator myAnimator;
     private HealthManager myHealthManager;
+    [SerializeField] private CanvasGroup uiCG;
 
-    [SerializeField] private Transform player;
 
+    [Header("Attack Variables")]
     [SerializeField] private float escapeRange;
     [SerializeField] private float magicAttackRange;
     [SerializeField] private float alertRange;
-
-
     [SerializeField] private float physicsDamage;
-    [SerializeField] private float magicDamage;
-
-    [SerializeField] private float cdLength;
-    private float cdTimer;
-
-    [SerializeField] private float moveSpeed;
-    [SerializeField] private float rotateSpeed;
-
     [SerializeField] private float attackAngle;
     [SerializeField] private float attackRadius;
 
-    [SerializeField] private GameObject toxicPrefab;
 
-    private bool rotatable;
-
-    private Vector3 initialPosition;
-    private Quaternion initialRotation;
-
-    [SerializeField] private CanvasGroup uiCG;
+    [Header("Movement Variables")]
+    [SerializeField] private float moveSpeed;
+    [SerializeField] private float rotateSpeed;
 
 
     // Start is called before the first frame update
@@ -44,9 +38,6 @@ public class BossController : MonoBehaviour
     {
         myAnimator = GetComponent<Animator>();
         myHealthManager = GetComponent<HealthManager>();
-
-        initialPosition = transform.position;
-        initialRotation = transform.rotation;
 
         //subscribe to events
         GameEvents.current.OnBossDead += Rest;
@@ -62,7 +53,7 @@ public class BossController : MonoBehaviour
     {
         if(!myHealthManager.Invisible) 
         {
-            LookAtPlayer();
+            LookAtTarget(player.position);
             CalPlayerDist();
         }
         else
@@ -72,10 +63,12 @@ public class BossController : MonoBehaviour
         }
     }
 
-    private void LookAtPlayer()
+    private void LookAtTarget(Vector3 v)
     {
+        Vector3 temp = v - transform.position;
+        temp.y = 0;
         transform.rotation = Quaternion.Slerp(transform.rotation, 
-            Quaternion.LookRotation(player.position - transform.position), rotateSpeed * Time.deltaTime);
+            Quaternion.LookRotation(temp), rotateSpeed * Time.deltaTime);
     }
 
     private void CalPlayerDist()
@@ -85,6 +78,8 @@ public class BossController : MonoBehaviour
 
         if(dist <= magicAttackRange)
         {
+            myAnimator.SetBool("Move Forward", false);
+
             if(dist <= escapeRange)
             {
                 //boss escape from player
@@ -117,7 +112,7 @@ public class BossController : MonoBehaviour
 
             UIExpansion.Show(uiCG);
             myAnimator.SetBool("Move Backwards", false);
-            myAnimator.SetBool("Move Forward", true);
+            myAnimator.SetBool("Move Forward", false);
 
             //boss attack magic
             if(cdTimer < cdLength)
@@ -133,6 +128,8 @@ public class BossController : MonoBehaviour
         else
         {
             UIExpansion.Hide(uiCG);
+            myAnimator.SetBool("Move Forward", false);
+            myAnimator.SetBool("Move Backwards", false);
         }
     }
 
@@ -163,65 +160,48 @@ public class BossController : MonoBehaviour
     private void Rest()
     {
         life --;
-        myHealthManager.Invisible = true;
+        
+        myAnimator.SetTrigger("Dead");
+
+        GameEvents.current.ToxicRisePre();
 
         //move to initial position and play dead animation
         // StartCoroutine("MoveInitial");
-
-        if(life > 0)
-        {
-            myAnimator.SetTrigger("Dead");
-
-            StartCoroutine(TideRising());
-            StartCoroutine("Resting");
-        }
-        else
-        {
-            Dead();
-        }    
     }
 
-    IEnumerator MoveInitial()
-    {
-        while(Vector3.Distance(transform.position ,initialPosition) > 0.05f)
-        {
-            myAnimator.SetBool("Move Forward", true);
+    // IEnumerator MoveInitial()
+    // {
+    //     while(Vector3.Distance(transform.position ,initialPosition) > 0.05f)
+    //     {
+    //         myAnimator.SetBool("Move Forward", true);
 
-            transform.position = Vector3.MoveTowards(transform.position, initialPosition, moveSpeed * 1.8f * Time.deltaTime);
-            transform.LookAt(initialPosition);
-            yield return null;
-        }
+    //         transform.position = Vector3.MoveTowards(transform.position, initialPosition, moveSpeed * 1.8f * Time.deltaTime);
 
-        while(Quaternion.Angle(transform.rotation, initialRotation) > 1f)
-        {
-            transform.rotation = Quaternion.Lerp(transform.rotation, initialRotation, rotateSpeed * 1.8f * Time.deltaTime);
-            yield return null;
-        }
+    //         LookAtTarget(initialPosition);
 
-        myAnimator.SetBool("Move Forward", false);
-        myAnimator.SetTrigger("Dead");
+    //         yield return null;
+    //     }
 
-        if(life > 0)
-        {
+    //     while(Quaternion.Angle(transform.rotation, initialRotation) > 1f)
+    //     {
+    //         myAnimator.SetBool("Move Forward", false);
 
-            StartCoroutine(TideRising());
-            StartCoroutine("Resting");
-        }
-        else
-        {
-            Dead();
-        }
-    }
-    IEnumerator TideRising()
-    {
-        //todo: time according to animation clip length
+    //         transform.rotation = Quaternion.Lerp(transform.rotation, initialRotation, rotateSpeed * 1.8f * Time.deltaTime);
+    //         yield return null;
+    //     }
+
+    //     myAnimator.SetTrigger("Dead");
+
+    // }
+
+
+    IEnumerator Resting()
+    {         
+        //time for player to run away from toxic
         yield return new WaitForSeconds(3f);
 
-        //trigger tide event
         GameEvents.current.ToxicRise();
-    }
-    IEnumerator Resting()
-    {
+
         while(timer < restTime)
         {
             timer += Time.deltaTime;
@@ -234,16 +214,23 @@ public class BossController : MonoBehaviour
             timer = 0;
             
             //set position and rotation
-            transform.position = initialPosition;
-            transform.localRotation = initialRotation;
+            // transform.position = initialPosition;
+            // transform.localRotation = initialRotation;
 
             myAnimator.SetTrigger("Born");
             GameEvents.current.ToxicFall();
         }
     }
-    private void Dead()
+    private void BossDead()
     {
-        GameEvents.current.LevelEnd();
+        if(life <= 0) 
+        {
+            GameEvents.current.LevelEnd();
+        }
+        else 
+        {
+            StartCoroutine(Resting());
+        }
     }
     
     private void Reborn()

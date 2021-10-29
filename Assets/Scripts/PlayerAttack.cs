@@ -37,7 +37,7 @@ public class PlayerAttack : MonoBehaviour
                     {
                         EnemyList[i].GetComponent<HealthManager>().Health -= playerDamage; 
                         if(EnemyList[i].GetComponent<EnemyController>()) EnemyList[i].GetComponent<EnemyController>().GetHit();
-                        Debug.Log(EnemyList[i].name + "is damaged");
+                        Debug.Log(EnemyList[i].name + " is damaged");
                     }
                 }
             }

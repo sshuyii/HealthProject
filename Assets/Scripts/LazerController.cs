@@ -6,20 +6,18 @@ public enum LazerMode
 {
     Static,
     Move,
-};
+}
 
 
 public class LazerController : MonoBehaviour
 {
-    
-    [SerializeField] LazerMode myLM;
-
-    [SerializeField] private int doorIdx;
-    [SerializeField] private Vector3 speed;
+    public LazerMode myLM;
+    [HideInInspector] public int DoorIdx;
+    [HideInInspector] public Transform LazerStop;
+    [HideInInspector] public Vector3 Speed;
     private bool move;
     private MeshRenderer[] myMRList;
     private Vector3 stopPoint;
-    [SerializeField] private Transform lazerStop;
     private Vector3 initialPosition;
 
     // Start is called before the first frame update
@@ -28,7 +26,7 @@ public class LazerController : MonoBehaviour
         if(myLM != LazerMode.Static)
         {
             initialPosition = transform.position;
-            stopPoint = lazerStop.position;
+            stopPoint = LazerStop.position;
         }
 
         myMRList = GetComponentsInChildren<MeshRenderer>();
@@ -45,12 +43,12 @@ public class LazerController : MonoBehaviour
         {
             if(Vector3.Distance(transform.position, stopPoint) > 0.05f)
             {
-                transform.position += speed * Time.deltaTime;
+                transform.position += Speed * Time.deltaTime;
             }
             else
             {
                 Disappear();
-                speed = Vector3.zero;
+                Speed = Vector3.zero;
             }
         }
     }
@@ -65,7 +63,7 @@ public class LazerController : MonoBehaviour
 
     private void Move(int i)
     {
-        if(doorIdx == i) move = true;
+        if(DoorIdx == i) move = true;
     }
     
 }

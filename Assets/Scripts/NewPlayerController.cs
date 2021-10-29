@@ -5,25 +5,27 @@ using UnityEngine.InputSystem;
 
 public class NewPlayerController : MonoBehaviour
 {
-    private int itemNum;
+    //references
     private PlayerInputActions playerInputActions;
     private CharacterController myCC;
     private Animator myAnimator;
+
+    [Header("Movement Variables")]
     [SerializeField] private float rotationSpeed;
     [SerializeField] private float runSpeed;
     [SerializeField] private float jumpVelocity;
+    private float gravity;
 
-    Vector2 currentMovementInput;
-    Vector3 currentMovement;
-    bool isMovePressed;
-    bool isRunPressed;
-    bool isJumpPressed;
-    bool isAttackPressed;
-    bool isPickPressed;
+    private Vector2 currentMovementInput;
+    private Vector3 currentMovement;
+    private bool isMovePressed;
+    private bool isRunPressed;
+    private bool isJumpPressed;
+    private bool isAttackPressed;
+
 
     private bool isAttacking;
     private bool isJumping;
-    private float gravity;
 
     [SerializeField] private string[] attackAnimNames;
 
@@ -53,12 +55,12 @@ public class NewPlayerController : MonoBehaviour
 
     private void Start() 
     {
-        GameEvents.current.OnPlayerDead += Dead;
+        GameEvents.current.OnPlayerDead += HandleDead;
     }
 
     private void OnDestroy() 
     {
-        GameEvents.current.OnPlayerDead -= Dead;
+        GameEvents.current.OnPlayerDead -= HandleDead;
     }
 
     private void OnMovementInput(InputAction.CallbackContext context)
@@ -148,10 +150,14 @@ public class NewPlayerController : MonoBehaviour
         }
     }
 
-    private void Dead()
+    private void HandleDead()
     {
         myAnimator.SetTrigger("Die");
-        GameEvents.current.PlayerDead();
+    }
+
+    private void Dead()
+    {
+        GameEvents.current.LevelFail();
     }
 
     private void HandleAnimation()
@@ -239,10 +245,4 @@ public class NewPlayerController : MonoBehaviour
         //disable the action map
         playerInputActions.Player.Disable();
     }
-
-    public void LevelEnd()
-    {
-        GameEvents.current.LevelEnd();
-    }
-
 }

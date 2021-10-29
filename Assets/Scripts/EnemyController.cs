@@ -9,30 +9,30 @@ public class EnemyController : MonoBehaviour
 
     [SerializeField] private Transform player;
 
+    [Header("Attack Variables")]
     [SerializeField] private float shortAttackRange;
     [SerializeField] private float longAttackRange;
     [SerializeField] private float alertRange;
+    [SerializeField] private float attackAngle;
+    [SerializeField] private float cdLength;
+    private float cdTimer;
 
 
+    [Header("Damage Variables")]
     [SerializeField] private float shortDamage;
     [SerializeField] private float longDamage;
 
-
-    [SerializeField] private float cdLength;
-    [SerializeField]private float cdTimer;
-
+    
+    [Header("Movement Variables")]
     [SerializeField] private float moveSpeed;
     [SerializeField] private float rotateSpeed;
 
-    [SerializeField] private float attackAngle;
 
     // Start is called before the first frame update
     void Start()
     {
         myAnimator = GetComponent<Animator>();
         myHealthManager = GetComponent<HealthManager>();
-
-        //subscribe to events
     }
 
     private void OnDestroy() 
@@ -100,7 +100,6 @@ public class EnemyController : MonoBehaviour
             //follow player
             transform.position = Vector3.MoveTowards(transform.position, player.position, moveSpeed * Time.deltaTime);
             myAnimator.SetBool("Move Forward", true);
-
         }
         else
         {

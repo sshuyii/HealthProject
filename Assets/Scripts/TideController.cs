@@ -6,7 +6,7 @@ public class TideController : MonoBehaviour
 {
     [SerializeField] private float speed;
     [SerializeField] private float height;
-    [SerializeField] private GameObject healthRecoverArea;
+    [SerializeField] private GameObject[] healthRecoverArray;
 
     private Vector3 initialPosition;
 
@@ -15,21 +15,29 @@ public class TideController : MonoBehaviour
     {
         initialPosition = transform.position;
 
+        foreach(GameObject g in healthRecoverArray)
+        {
+            g.SetActive(false);
+        }
+
         //subscribe to events
         GameEvents.current.OnToxicFall += Fall;
         GameEvents.current.OnToxicRise += Rise;
+        GameEvents.current.OnToxicRisePre += HealthRecover;
+
     }
 
     private void OnDestroy() 
     {
         GameEvents.current.OnToxicFall -= Fall;
         GameEvents.current.OnToxicRise -= Rise;
+        GameEvents.current.OnToxicRisePre -= HealthRecover;
     }
 
-    // Update is called once per frame
-    void Update()
+    private void HealthRecover()
     {
-        
+        int temp = Random.Range(0, 4);
+        healthRecoverArray[temp].SetActive(true);
     }
 
     private void Rise()
@@ -40,8 +48,6 @@ public class TideController : MonoBehaviour
 
     IEnumerator Rising()
     {
-        healthRecoverArea.SetActive(true);
-
         while(transform.position.y < height + initialPosition.y)
         {
             // Debug.Log("Stone is rising");
@@ -58,14 +64,17 @@ public class TideController : MonoBehaviour
 
     private void Fall()
     {
+        foreach(GameObject g in healthRecoverArray)
+        {
+            g.SetActive(false);
+        }
+
         StopCoroutine("Falling");
         StartCoroutine("Falling");
     }
 
     IEnumerator Falling()
     {
-        healthRecoverArea.SetActive(false);
-
         while(transform.position.y > initialPosition.y)
         {
             // Debug.Log("Stone is falling");

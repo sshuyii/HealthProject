@@ -21,7 +21,6 @@ public class DoorController : MonoBehaviour
         //subscribe to events
         GameEvents.current.OnDoorOpen += Open;
         GameEvents.current.OnDoorClose += Close;
-
     }
 
     private void OnDestroy() 

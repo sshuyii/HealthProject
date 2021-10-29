@@ -9,7 +9,6 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private ChestController chest;
     [SerializeField] private CanvasGroup levelEndCG;
     [SerializeField] private CanvasGroup levelFailCG;
-
     [SerializeField] private DoorController finalDoor;
 
     // Start is called before the first frame update
@@ -23,7 +22,7 @@ public class LevelManager : MonoBehaviour
         //subscribe to events
         GameEvents.current.OnLevelEnd += LevelEnd;
         GameEvents.current.OnEnemyDead += EnemyDead;
-        GameEvents.current.OnPlayerDead += LevelFail;
+        GameEvents.current.OnLevelFail += LevelFail;
 
     }
 
@@ -31,7 +30,7 @@ public class LevelManager : MonoBehaviour
     {
         GameEvents.current.OnLevelEnd -= LevelEnd;
         GameEvents.current.OnEnemyDead -= EnemyDead;
-        GameEvents.current.OnPlayerDead -= LevelFail;
+        GameEvents.current.OnLevelFail -= LevelFail;
 
     }
 

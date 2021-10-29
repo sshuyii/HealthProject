@@ -2,27 +2,29 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 
+public enum CharacterType
+{
+    Player,
+    Enemy,
+    Boss
+}
+
+
 public class HealthManager : MonoBehaviour
 {
-    public enum CharacterType
-    {
-        Player,
-        Enemy,
-        Boss
-    }
-
-    public bool Invisible = false;
     public CharacterType myCharacterType;
-    [SerializeField] private Image healthBar;
     public float MaxHealth;
 
-    [SerializeField] private float toxicDamage;
-    [SerializeField] private float healthRecover;
+    [SerializeField] private Image healthBar;
+
+    [HideInInspector] public bool Invisible = false;
+    [HideInInspector] public float ToxicDamage;
+    [HideInInspector] public float HealthRecover;
 
     private float health;
     public float Health
     {
-        get{return health; }
+        get{ return health; }
         set
         {
             if(!Invisible)
@@ -79,7 +81,7 @@ public class HealthManager : MonoBehaviour
             if(myCharacterType == CharacterType.Player)
             {
                 Debug.Log(gameObject.name + " is in toxic");
-                Health -= toxicDamage;
+                Health -= ToxicDamage;
             }
         }
         else if(other.CompareTag("Health"))
@@ -87,7 +89,7 @@ public class HealthManager : MonoBehaviour
             if(myCharacterType == CharacterType.Player)
             {
                 Debug.Log(gameObject.name + " is recovering");
-                Health += healthRecover;
+                Health += HealthRecover;
             }
         }
     }

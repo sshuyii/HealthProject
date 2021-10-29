@@ -16,22 +16,31 @@ public class GameEvents : MonoBehaviour
         //called by other scripts
         OnPlayerAttack?.Invoke();
     }
+    public event Action OnToxicRisePre;
+    public void ToxicRisePre()
+    {
+        Debug.Log("Event = ToxicRisePre");
+        OnToxicRisePre?.Invoke();
+    }
 
     public event Action OnToxicRise;
     public void ToxicRise()
     {
+        Debug.Log("Event =  ToxicRise");
         OnToxicRise?.Invoke();
     }
 
     public event Action OnToxicFall;
     public void ToxicFall()
     {
+        Debug.Log("Event =  ToxicFall");
         OnToxicFall?.Invoke();
     }
 
     public event Action OnBossDead;
     public void BossDead()
     {
+        Debug.Log("Event =  BossDead");
         OnBossDead?.Invoke();
     }
 
@@ -45,6 +54,12 @@ public class GameEvents : MonoBehaviour
     public void LevelEnd()
     {
         OnLevelEnd?.Invoke();
+    }
+
+    public event Action OnLevelFail;
+    public void LevelFail()
+    {
+        OnLevelFail?.Invoke();
     }
 
     public event Action OnEnemyDead;

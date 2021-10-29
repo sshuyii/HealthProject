@@ -20,6 +20,8 @@ public class ChestController : MonoBehaviour
         }
     }
     [SerializeField] private CanvasGroup pickUI;
+    [HideInInspector] public MeshRenderer myMR;
+
 
     private bool empty;
     public bool Empty
@@ -35,9 +37,9 @@ public class ChestController : MonoBehaviour
             }
         }
     }
+
     private bool pickable;
 
-    public MeshRenderer myMR;
 
     // Start is called before the first frame update
     void Start()
